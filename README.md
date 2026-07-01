@@ -5,7 +5,7 @@ An AI agent-based pipeline that automates web application security review — co
 ## Status
 
 - [x] OWASP Juice Shop set up locally via Docker
-- [ ] Trivy scanning integrated
+- [x] Trivy scanning integrated
 - [ ] Mastra.ai agent pipeline built
 - [ ] Findings workflow documented
 - [ ] Example run + sample output published
@@ -62,7 +62,36 @@ docker logs juice-shop     # view logs
 
 ## Trivy Scanning
 
-*(To be documented once integrated — will include scan commands, target scope, and how output feeds into the agent layer.)*
+[Trivy](https://trivy.dev/) scans the running Juice Shop image for OS package and Node.js dependency vulnerabilities. Reports are saved under `scans/` — a human-readable table for review and a JSON version intended as structured input for the future Mastra.ai agent stage.
+
+### How it was run
+
+```bash
+# Human-readable table
+trivy image --scanners vuln --severity CRITICAL,HIGH,MEDIUM,LOW \
+  -f table -o scans/juice-shop-trivy-report.txt bkimminich/juice-shop
+
+# Structured JSON (for agent consumption)
+trivy image --scanners vuln --severity CRITICAL,HIGH,MEDIUM,LOW \
+  -f json -o scans/juice-shop-trivy-report.json bkimminich/juice-shop
+```
+
+### Results (2026-07-01)
+
+79 total vulnerabilities found across OS packages and Node.js dependencies:
+
+| Target | Total | Critical | High | Medium | Low |
+|---|---|---|---|---|---|
+| Debian OS packages | 12 | 0 | 0 | 5 | 7 |
+| Node.js dependencies | 67 | 5 | 35 | 23 | 4 |
+
+Critical findings (Node.js deps):
+- `crypto-js` — CVE-2023-46233 (PBKDF2 key derivation weaker than spec, fix: 4.2.0)
+- `jsonwebtoken` — CVE-2015-9235 (weak JWT signature verification)
+- `lodash` — CVE-2019-10744 (prototype pollution)
+- `marsdb` — GHSA-5mrr-rgp6-x4gr
+
+This is expected — Juice Shop intentionally ships outdated, vulnerable dependencies as training material. Full details are in `scans/juice-shop-trivy-report.txt` and `scans/juice-shop-trivy-report.json`.
 
 ## Mastra.ai Agent Pipeline
 
