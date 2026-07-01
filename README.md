@@ -80,16 +80,24 @@ trivy image --scanners vuln --severity CRITICAL,HIGH,MEDIUM,LOW \
 
 79 total vulnerabilities found across OS packages and Node.js dependencies:
 
-| Target | Total | Critical | High | Medium | Low |
-|---|---|---|---|---|---|
-| Debian OS packages | 12 | 0 | 0 | 5 | 7 |
-| Node.js dependencies | 67 | 5 | 35 | 23 | 4 |
+| Severity | Count |
+|---|---|
+| CRITICAL | 5 |
+| HIGH | 35 |
+| MEDIUM | 28 |
+| LOW | 11 |
 
-Critical findings (Node.js deps):
-- `crypto-js` — CVE-2023-46233 (PBKDF2 key derivation weaker than spec, fix: 4.2.0)
-- `jsonwebtoken` — CVE-2015-9235 (weak JWT signature verification)
-- `lodash` — CVE-2019-10744 (prototype pollution)
-- `marsdb` — GHSA-5mrr-rgp6-x4gr
+Top 5 most severe (by CVSS score):
+
+| # | Package | CVE / ID | Severity | CVSS | Issue |
+|---|---|---|---|---|---|
+| 1 | `jsonwebtoken` | CVE-2015-9235 | CRITICAL | 9.8 | Verification step can be bypassed with an altered token — attacker can forge valid-looking JWTs |
+| 2 | `crypto-js` | CVE-2023-46233 | CRITICAL | 9.1 | PBKDF2 implementation is ~1.3M times weaker than the 1993 spec — trivially crackable key derivation |
+| 3 | `lodash` | CVE-2019-10744 | CRITICAL | 9.1 | Prototype pollution in `defaultsDeep` — can lead to RCE or DoS depending on usage |
+| 4 | `express-jwt` | CVE-2020-15084 | HIGH | 9.1 | Authorization bypass — improper audience/algorithm validation lets attackers forge auth |
+| 5 | `tar` (node-tar) | CVE-2026-23950 | HIGH | 8.8 | Arbitrary file overwrite via Unicode path collision during extraction |
+
+The `jsonwebtoken` and `express-jwt` findings are notable together — they hit the exact authentication mechanism Juice Shop's login/JWT flow relies on, making them good candidates to prioritize first once the agent triage stage exists.
 
 This is expected — Juice Shop intentionally ships outdated, vulnerable dependencies as training material. Full details are in `scans/juice-shop-trivy-report.txt` and `scans/juice-shop-trivy-report.json`.
 
