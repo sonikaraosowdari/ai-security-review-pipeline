@@ -159,7 +159,7 @@ Full ranked list with per-finding risk explanation and remediation is in `scans/
 
 ## Next Steps
 
-- [ ] Run the agent pipeline end-to-end and publish a sample triage report
+- [x] Run the agent pipeline end-to-end and publish a sample triage report
 - [ ] Add CubeGoat / cloud misconfiguration scanning
 - [ ] Move scanning + agent run into a repeatable script or CI job
 
