@@ -8,7 +8,7 @@ An AI agent-based pipeline that automates web application security review — co
 - [x] Trivy scanning integrated
 - [x] Mastra.ai agent pipeline scaffolded
 - [x] Findings workflow documented
-- [ ] Example run + sample output published
+- [x] Example run + sample output published
 
 ## Why this project
 
@@ -139,7 +139,15 @@ npm run dev            # opens the Mastra dev playground to chat with the agent 
 
 ## Example Finding
 
-*(To be added once the pipeline produces its first end-to-end result — a before/after showing raw Trivy output vs. the agent's triaged, human-readable version.)*
+First end-to-end run, `scans/agent-triage-report.md` / `.json`. The agent condensed 79 raw findings to 15 ranked, deduplicated ones and re-prioritized by exploitability rather than raw scanner severity:
+
+> This scan of Juice Shop (an intentionally vulnerable training app) found 79 issues, but raw counts overstate risk since many are OS-level or low-exposure. The real priorities are ancient, broken authentication and token-signing libraries (jsonwebtoken, express-jwt, jws) that allow complete login bypass, plus a critically weak password-hashing library (crypto-js) and a command-injection flaw in the bundled database layer (marsdb).
+
+Notable re-ranking calls it made on its own:
+- `express-jwt` (scanner severity: HIGH) ranked above several CRITICALs — an audience-validation bypass on JWT auth is more exploitable in practice than its raw score implies.
+- `notevil` (scanner severity: MEDIUM) flagged as a bigger risk than its score suggests, because it's used as a JS sandbox and the CVE is a sandbox escape.
+
+Full ranked list with per-finding risk explanation and remediation is in `scans/agent-triage-report.md`.
 
 ## Tech Stack
 
