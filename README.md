@@ -6,8 +6,8 @@ An AI agent-based pipeline that automates web application security review — co
 
 - [x] OWASP Juice Shop set up locally via Docker
 - [x] Trivy scanning integrated
-- [ ] Mastra.ai agent pipeline built
-- [ ] Findings workflow documented
+- [x] Mastra.ai agent pipeline scaffolded
+- [x] Findings workflow documented
 - [ ] Example run + sample output published
 
 ## Why this project
@@ -103,7 +103,39 @@ This is expected — Juice Shop intentionally ships outdated, vulnerable depende
 
 ## Mastra.ai Agent Pipeline
 
-*(To be documented once built — will include agent architecture, what the agent does with raw scanner output, and how it prioritizes/contextualizes findings.)*
+The agent pipeline lives in `agent/` as a standalone Node/TypeScript project (scaffolded with `create-mastra`). It reads a Trivy JSON report, has Claude (Anthropic) triage and prioritize the findings, and writes a structured report back to `scans/`.
+
+### Structure
+
+```
+agent/
+├── src/
+│   ├── mastra/
+│   │   ├── schemas.ts                          # shared Zod schemas
+│   │   ├── tools/read-trivy-report-tool.ts     # parses scans/*.json into normalized findings
+│   │   ├── agents/security-triage-agent.ts     # Claude agent that prioritizes/explains findings
+│   │   ├── workflows/security-triage-workflow.ts  # read report -> prompt -> triage -> write report
+│   │   └── index.ts                            # registers the agent + workflow with Mastra
+│   └── run-triage.ts                           # standalone script to run the workflow end-to-end
+```
+
+### How the workflow works
+
+1. **`read-trivy-report`** tool loads `scans/juice-shop-trivy-report.json`, normalizes each finding (package, CVE/ID, severity, versions, CVSS), and computes severity counts.
+2. A mapping step turns that data into a prompt for the agent.
+3. **`security-triage-agent`** (Claude, via `@ai-sdk/anthropic`) prioritizes findings by real-world exploitability rather than raw severity alone — e.g. it's instructed to weigh auth-related packages (`jsonwebtoken`, `express-jwt`) heavily — and returns a structured report (executive summary, severity counts, ranked findings with risk explanation + remediation) validated against a Zod schema.
+4. A final step writes the result to `scans/agent-triage-report.json` and `scans/agent-triage-report.md`.
+
+### Running it
+
+```bash
+cd agent
+npm install
+cp .env.example .env   # then add your ANTHROPIC_API_KEY
+npm run triage         # runs the workflow once via src/run-triage.ts
+# or
+npm run dev            # opens the Mastra dev playground to chat with the agent / inspect the workflow graph
+```
 
 ## Example Finding
 
@@ -119,10 +151,9 @@ This is expected — Juice Shop intentionally ships outdated, vulnerable depende
 
 ## Next Steps
 
-- [ ] Define scope for AI-assisted security review
-- [ ] Add tooling/scripts for automated scanning
-- [ ] Document findings workflow
-- [ ] Publish sample findings output
+- [ ] Run the agent pipeline end-to-end and publish a sample triage report
+- [ ] Add CubeGoat / cloud misconfiguration scanning
+- [ ] Move scanning + agent run into a repeatable script or CI job
 
 ## Background
 
