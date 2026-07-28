@@ -29,7 +29,7 @@ Manual security review doesn't scale — triaging scanner output, correlating fi
 - **Target application:** [OWASP Juice Shop](https://owasp.org/www-project-juice-shop/), an intentionally vulnerable web app, run locally via Docker as a safe, reproducible test target.
 - **Scanning:** [Trivy](https://trivy.dev/) for dependency, container, and vulnerability scanning against the running app/image.
 - **Agent layer:** Built with [Mastra.ai](https://mastra.ai/) (TypeScript) — takes raw scan output and produces triaged, prioritized, and explained findings.
-- **Infrastructure:** AWS, with CubeGoat used for cloud misconfiguration/infra-side testing.
+- **Infrastructure:** AWS, with KubeGoat used for Kubernetes misconfiguration/cluster-side testing.
 
 ## OWASP Juice Shop (Local Setup)
 
@@ -155,12 +155,12 @@ Full ranked list with per-finding risk explanation and remediation is in `scans/
 - **Agent framework:** Mastra.ai
 - **Scanner:** Trivy
 - **Target app:** OWASP Juice Shop (Docker)
-- **Infrastructure:** AWS, CubeGoat
+- **Infrastructure:** AWS, KubeGoat
 
 ## Next Steps
 
 - [x] Run the agent pipeline end-to-end and publish a sample triage report
-- [ ] Add CubeGoat / cloud misconfiguration scanning
+- [ ] Add KubeGoat / Kubernetes misconfiguration scanning
 - [ ] Move scanning + agent run into a repeatable script or CI job
 
 ## Background
